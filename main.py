@@ -1,22 +1,23 @@
 import pandas as pd
 
 
-df = pd.read_csv('hotels.csv', dtype={"id": str})
+hotels_df = pd.read_csv('hotels.csv', dtype={"id": str})
+cards_df = pd.read_csv("cards.csv", dtype=str).to_dict(orient="records")
 
 
 class Hotel:
     def __init__(self, hotel_id):
         self.hotel_id = hotel_id
-        self.name = df.loc[df["id"] == self.hotel_id, "name"].squeeze()
+        self.name = hotels_df.loc[hotels_df["id"] == self.hotel_id, "name"].squeeze()
 
     def book(self):
         """Change availability to no"""
-        df.loc[df["id"] == self.hotel_id, "available"] = "no"
-        df.to_csv('hotels.csv', index=False)
+        hotels_df.loc[hotels_df["id"] == self.hotel_id, "available"] = "no"
+        hotels_df.to_csv('hotels.csv', index=False)
 
     def available(self):
         """Check if hotel is available"""
-        availability = df.loc[df["id"] == self.hotel_id, "available"].squeeze()
+        availability = hotels_df.loc[hotels_df["id"] == self.hotel_id, "available"].squeeze()
         if availability == "yes":
             return True
         else:
@@ -37,14 +38,32 @@ class ReservationTicket:
         """
         return message
 
-print(df)
+
+class CreditCard:
+    def __init__(self, number):
+        self.number = number
+
+    def validate(self,expiration_date, cvc, holder):
+        card_information = {"number" : self.number, "expiration" : expiration_date,
+                            "cvc" : cvc, "holder" : holder}
+        if card_information in cards_df:
+            return True
+        else:
+            return False
+
+
+print(hotels_df)
 name = input("Enter customer name: ")
-hotel_id = input("Enter hotel id: ")
-hotel = Hotel(hotel_id)
+user_hotel_id = input("Enter hotel id: ")
+hotel = Hotel(user_hotel_id)
 
 if hotel.available():
-    hotel.book()
-    ticket = ReservationTicket(customer_name=name, hotel_booked=hotel)
-    print(ticket.generate())
+    card_info = CreditCard(number="1234567890123456")
+    if card_info.validate(expiration_date="12/26", cvc="123", holder="JOHN SMITH"):
+        hotel.book()
+        ticket = ReservationTicket(customer_name=name, hotel_booked=hotel)
+        print(ticket.generate())
+    else:
+        print("Card doesn't exist.")
 else:
-    print('Hotel not available')
+    print('Hotel not available.')
