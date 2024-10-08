@@ -60,11 +60,21 @@ class SecureCreditCard(CreditCard):
         else:
             return False
 
+class BookSpa(ReservationTicket):
+    def book(self):
+        spa_ticket = f"""
+        THANK YOU FOR BOOKING A SPA
+        Booking Details:
+        Name: {self.customer_name}
+        Hotel name: {self.hotel_name.name}
+        """
+        return spa_ticket
 
 print(hotels_df)
 name = input("Enter customer name: ")
 user_hotel_id = input("Enter hotel id: ")
 hotel = Hotel(user_hotel_id)
+ticket = BookSpa(customer_name=name, hotel_booked=hotel)
 
 if hotel.available():
     card_info = SecureCreditCard(number="1234567890123456")
@@ -72,7 +82,6 @@ if hotel.available():
         entered_password = input("Enter your password: ")
         if card_info.authentication(entered_password):
             hotel.book()
-            ticket = ReservationTicket(customer_name=name, hotel_booked=hotel)
             print(ticket.generate())
         else:
             print("Password incorrect.")
@@ -80,3 +89,9 @@ if hotel.available():
         print("Card doesn't exist.")
 else:
     print('Hotel not available.')
+
+spa_question = input("Do you want to book a spa? (yes/no): ")
+if spa_question == "yes":
+    print(ticket.book())
+else:
+    print("No spa booked. Thank you for your reservation.")
